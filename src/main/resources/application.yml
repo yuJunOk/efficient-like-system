@@ -1,0 +1,71 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+    session:
+      cookie:
+        domain: localhost
+
+spring:
+  # 指定环境，决定选择配置文件
+  profiles:
+    active: local
+  application:
+    name: efficient-like-system
+  # session 失效时间
+  session:
+    timeout: 86400
+    store-type: redis
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: 需要填写
+    password: 需要填写
+    url: jdbc:mysql://localhost:3306/db_like?characterEncoding=UTF8&useUnicode=true&useSSL=false
+  data:
+    redis:
+      port: 6379
+      host: localhost #redis服务器IP
+      password: 需要填写 #默认为空
+      database: 1 # 设置存入redis的哪一个库（默认为0）
+  mail:
+    protocol: smtp #邮件协议
+    host: smtp.126.com #网易邮箱smtp服务器地址
+    port: 25 #默认端口
+    username: 需要填写 #发件人邮箱地址
+    password: 需要填写 #授权码
+    default-encoding: UTF-8 #编码字符集
+
+mybatis-plus:
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  #configuration:
+  #  log-impl: org.apache.ibatis.logging.stdout.StdOutImpl #mybatis日志打印
+
+# 配置springdoc-openapi，用于文档化和访问API
+springdoc:
+  # 配置Swagger UI的访问路径和排序方式
+  swagger-ui:
+    path: /swagger-ui.html  # Swagger UI的访问路径
+    tags-sorter: alpha      # 按字母顺序排序标签
+    operations-sorter: alpha  # 按字母顺序排序操作
+  # 配置API文档的访问路径
+  api-docs:
+    path: /v3/api-docs  # API文档的访问路径
+  # 配置API分组，用于组织和管理API
+  group-configs:
+    - group: 'default'   # API分组名称
+      paths-to-match: '/**'  # 匹配所有路径
+      packages-to-scan: com.els.controller  # 扫描的包，用于自动发现API
+
+# knife4j的增强配置，不需要增强可以不配（详细版见下小节）
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+  basic:
+    enable: true
+    username: admin
+    password: 123456
