@@ -13,6 +13,14 @@ import jakarta.servlet.http.HttpServletRequest;
 public interface ThumbService extends IService<Thumb> {
 
     /**
+     * 是否点赞
+     * @param blogId
+     * @param userId
+     * @return
+     */
+    Boolean hasThumb(Long blogId, Long userId);
+
+    /**
      * 点赞
      * @param idDto
      * @param request

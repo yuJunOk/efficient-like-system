@@ -3,6 +3,7 @@ package com.els.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.els.constant.ThumbConstant;
 import com.els.pojo.domain.Blog;
 import com.els.pojo.domain.Thumb;
 import com.els.pojo.domain.User;
@@ -14,6 +15,7 @@ import com.els.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -38,6 +40,9 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
     @Resource
     private ThumbService thumbService;
 
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
+
     @Override
     public BlogVo getBlogVoById(long blogId, HttpServletRequest request) {
         Blog blog = this.getById(blogId);
@@ -50,14 +55,15 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
         User loginUser = userService.getCurrentUser(request);
         Map<Long, Boolean> blogIdHasThumbMap = new HashMap<>();
         if (ObjUtil.isNotEmpty(loginUser)) {
-            Set<Long> blogIdSet = blogList.stream().map(Blog::getId).collect(Collectors.toSet());
+            List<Object> blogIdList = blogList.stream().map(blog -> blog.getId().toString()).collect(Collectors.toList());
             // 获取点赞
-            List<Thumb> thumbList = thumbService.lambdaQuery()
-                    .eq(Thumb::getUserId, loginUser.getId())
-                    .in(Thumb::getBlogId, blogIdSet)
-                    .list();
-
-            thumbList.forEach(blogThumb -> blogIdHasThumbMap.put(blogThumb.getBlogId(), true));
+            List<Object> thumbList = redisTemplate.opsForHash().multiGet(ThumbConstant.USER_THUMB_KEY_PREFIX + loginUser.getId(), blogIdList);
+            for (int i = 0; i < thumbList.size(); i++) {
+                if (thumbList.get(i) == null) {
+                    continue;
+                }
+                blogIdHasThumbMap.put(Long.valueOf(blogIdList.get(i).toString()), true);
+            }
         }
 
         return blogList.stream()
@@ -78,11 +84,8 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
             return blogVo;
         }
 
-        Thumb thumb = thumbService.lambdaQuery()
-                .eq(Thumb::getUserId, loginUser.getId())
-                .eq(Thumb::getBlogId, blog.getId())
-                .one();
-        blogVo.setHasThumb(thumb != null);
+        Boolean exist = thumbService.hasThumb(blog.getId(), loginUser.getId());
+        blogVo.setHasThumb(exist);
 
         return blogVo;
     }
