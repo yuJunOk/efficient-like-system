@@ -123,6 +123,12 @@
             <artifactId>redisson</artifactId>
             <version>3.45.1</version>
         </dependency>
+        <!-- caffeine高性能本地缓存 -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>3.1.8</version>
+        </dependency>
     </dependencies>
 
     <build>
