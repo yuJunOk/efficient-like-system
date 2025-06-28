@@ -13,6 +13,7 @@ import com.els.service.ThumbService;
 import com.els.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -33,6 +34,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
     @Resource
     private UserService userService;
 
+    @Lazy
     @Resource
     private ThumbService thumbService;
 
